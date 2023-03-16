@@ -1,0 +1,17 @@
+FROM phpswoole/swoole:5.0.1-php8.1
+RUN \ 
+apt-get update          &&  \
+apt-get install -y          \
+libboost-all-dev            \
+--no-install-recommends &&  \
+curl -sfL https://github.com/swoole/yasd/archive/refs/heads/master.tar.gz | tar -zx 
+# \
+# cd yasd-master && \
+# phpize --clean && \
+# phpize && \
+# ./configure && \
+# make clean && \
+# make && \
+# make install
+ENTRYPOINT ["/entrypoint.sh"]
+WORKDIR "/var/www/"

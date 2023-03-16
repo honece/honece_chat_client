@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+    volumes:
+      - ./redis/conf/redis.conf:/etc/redis/redis.conf
+      - ./redis/data:/data
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d/
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: honece_chat
+      
+
+  swoole:
+    image: phpswoole/swoole:5.0.1-php8.1
+    ports:
+      - 9501:9501
+    volumes:
+      - ./:/var/www
+      # - ./phpini:/usr/local/etc/php

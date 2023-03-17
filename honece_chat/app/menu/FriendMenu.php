@@ -29,8 +29,6 @@ class FriendMenu extends Menu
             $friend[$value['id']] = $value['account'];
         }
         (new ChatMenu)->showFriend($friend);
-        // ChatMenu::showFriend($friend);
-        //显示好友菜单
     }
     function addFriend()
     {
@@ -39,8 +37,6 @@ class FriendMenu extends Menu
         $friendId = Member::where('account', $friend)
             ->where('account', '<>', USER['name'])
             ->value('id');
-
-
         if (!$friendId) {
             $this->output->writeln("没有这个用户,请重新输入");
             (new $this)->start();
@@ -60,6 +56,6 @@ class FriendMenu extends Menu
     // TODO 好友申请菜单
     function showMsg()
     {
-        
+
     }
 }

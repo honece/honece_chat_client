@@ -25,7 +25,7 @@ class TcpClient
             die;
         }
 
-        Coroutine::create([$this, 'recvmsg']);
+        Coroutine::create([$this, 'recvmsg']);//定时任务，也可以用Timer实现
         Coroutine::create([$this, 'main']);
         Coroutine::create([$this, 'keepAlive']);
     }
@@ -73,7 +73,9 @@ class TcpClient
      */
     function keepAlive()
     {
-        \Co::sleep(50);
-        self::$conn->send(json_encode(['action'=>'heartbeat', "pong pong pong"]));
+        while (true) {
+            \Co::sleep(50);
+            self::$conn->send(json_encode(['action' => 'heartbeat', "pong pong pong"]));
+        }
     }
 }

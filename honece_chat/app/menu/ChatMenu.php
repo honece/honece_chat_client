@@ -25,7 +25,7 @@ class ChatMenu extends Menu
         if (!method_exists($this, $menufunc)) {
             $this->sendMsg($menufunc);
         }
-        parent->$menufunc();
+        $this->$menufunc();
     }
 
     function sendMsg($friendId)

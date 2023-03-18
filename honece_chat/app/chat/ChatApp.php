@@ -24,6 +24,4 @@ class ChatApp extends TcpClient
             self::$conn->send($msg);
         }
     }
-
-
 }

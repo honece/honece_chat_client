@@ -9,23 +9,29 @@ use app\model\Member;
 
 class FriendMenu extends Menu
 {
+    private $friend;
+
     protected array $subMenu = [
         'chatFriend' => '和在线好友聊天',
         'addFriend'  => '添加好友',
         'delFriend'  => '删除好友'
     ];
     protected string $menuName = '好友菜单';
+
+    function __construct()
+    {
+        parent::__construct();
+        try {
+            //放在这里不好，每次new对象都会重新查数据库，增加网络IO
+            $this->friend = Friend::getMemberInfo();
+        } catch (\Throwable $th) {
+            echo $th->getMessage();
+        }
+    }
     function chatFriend()
     {
         //和在线好友聊天，显示在线好友菜单
-        $friendInfo = Member::
-            hasWhere(
-                'listFriend',
-                ['member_id' => USER['id']]
-            )
-            ->where('status', 0)
-            ->select()->toArray();
-        foreach ($friendInfo as $key => $value) {
+        foreach ($this->friend as $key => $value) {
             $friend[$value['id']] = $value['account'];
         }
         (new ChatMenu)->showFriend($friend);
@@ -51,11 +57,38 @@ class FriendMenu extends Menu
     }
     function delFriend()
     {
+        $this->output->writeln("请输入好友账号");
+        $friend = trim(fgets(STDIN));
+        //这里正常情况下需要请求server，为了方便，直接删除
         //删除好友
-    }
-    // TODO 好友申请菜单
-    function showMsg()
-    {
+        try {
+            foreach ($this->friend as $key => $value) {
+                if ($value['account'] == $friend) {
+                    $friendId = $value['id'];
+                }
+            }
+            if (!isset($friendId)) {
+                $this->output->writeln("未找到好友");
+                (new $this)->start();
+            }
+            Friend::whereOr([
+                [
+                    ['friend_id', '=', USER['id']],
+                    ['member_id', '=', $friendId]
+                ],
+                [
+                    ['friend_id', '=', $friendId],
+                    ['member_id', '=', USER['id']]
+                ]
+            ])->delete();
+
+            $this->output->writeln("删除好友成功");
+            (new $this)->start();
+        } catch (\Throwable $th) {
+            $this->output->writeln("删除好友失败");
+            (new $this)->start();
+        }
+
 
     }
 }

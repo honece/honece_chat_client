@@ -6,6 +6,7 @@ use app\model\Member;
 use app\model\Msgbox;
 use app\model\Friend;
 use app\model\Group;
+use think\facade\Db;
 
 class ApplyMenu extends Menu
 {
@@ -98,10 +99,10 @@ class ApplyMenu extends Menu
         while ($msg = trim(fgets(STDIN))) {
             if ($msg == 'Y') {
                 if ($this->msg[$msg_id]['type'] == 0) {
-                    $this->addfriend();
+                    $this->addfriend($msg_id);
                 }
                 else if ($this->msg[$msg_id]['type'] == 2) {
-                    $this->addGroup();
+                    $this->addGroup($msg_id);
                 }
             }
             else if ($msg == 'n') {
@@ -118,11 +119,34 @@ class ApplyMenu extends Menu
         (new $this)->start();
 
     }
-    function addfriend()
+    function addfriend($msg_id)
     {
-        
+        $send = $this->msg[$msg_id]['send']; //发送人
+        $recv = $this->msg[$msg_id]['recv']; //接收人
+
+        Db::startTrans();
+        try {
+            Friend::create([
+                'member_id' => $recv,
+                'friend_id' => $send
+            ]);
+            Friend::create([
+                'member_id' => $send,
+                'friend_id' => $recv
+            ]);
+            Msgbox::update(['status' => '1'], ['id' => $msg_id]);
+            Db::commit();
+            $this->output->writeln("添加好友成功");
+            (new $this)->start();
+
+        } catch (\Throwable $th) {
+            Db::rollback();
+            $this->output->writeln("添加好友失败");
+            (new $this)->start();
+        }
+
     }
-    function addGroup()
+    function addGroup($msg_id)
     {
 
     }

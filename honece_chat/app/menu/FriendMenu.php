@@ -30,11 +30,16 @@ class FriendMenu extends Menu
     }
     function chatFriend()
     {
-        //和在线好友聊天，显示在线好友菜单
         foreach ($this->friend as $key => $value) {
             $friend[$value['id']] = $value['account'];
         }
-        (new ChatMenu)->showFriend($friend);
+        if (!empty($friend)) {
+            (new ChatMenu)->showFriend($friend);
+        }
+        else {
+            $this->output->writeln("没有好友在线");
+            (new $this)->start();
+        }
     }
     function addFriend()
     {
@@ -88,7 +93,5 @@ class FriendMenu extends Menu
             $this->output->writeln("删除好友失败");
             (new $this)->start();
         }
-
-
     }
 }

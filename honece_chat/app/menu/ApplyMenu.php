@@ -2,6 +2,7 @@
 namespace app\menu;
 
 use app\menu\base\Menu;
+use app\model\GroupMember;
 use app\model\Member;
 use app\model\Msgbox;
 use app\model\Friend;
@@ -31,7 +32,7 @@ class ApplyMenu extends Menu
     {
         try {
             Friend::getMemberInfo();
-            $this->msg = Msgbox::where('recv', USER['id'])->where('status', 0)->Column('send,recv,type', 'id');
+            $this->msg = Msgbox::where('recv', USER['id'])->where('status', 0)->Column('send,recv,type,group_id', 'id');
             if (empty($this->msg)) {
                 $this->output->writeln('没有申请信息');
                 (new MainMenu)->start();
@@ -52,7 +53,6 @@ class ApplyMenu extends Menu
                     ];
                 }
             }
-
             if (!empty($friendIds)) {
                 $this->friendMemberInfo = Member::whereIn('id', array_column($friendIds, 'send'))->column('account', 'id');
                 foreach ($friendIds as $key => $value) {
@@ -61,14 +61,14 @@ class ApplyMenu extends Menu
             }
 
             if (!empty($grouplist)) {
-                $this->groupInfo       = Group::whereIn('id', array_column($grouplist, 'group_id')->column('group_name', 'id'));
-                $this->groupMemberInfo = Member::whereIn('id', array_column($grouplist, 'send')->column('account', 'id'));
-
+                //TODO
+                $this->groupInfo       = Group::whereIn('id', array_column($grouplist, 'group_id'))->column('group_name', 'id');
+                $this->groupMemberInfo = Member::whereIn('id', array_column($grouplist, 'send'))->column('account', 'id');
                 foreach ($grouplist as $key => $value) {
                     $this->subMenu['msg_' . $key] =
                         $this->groupMemberInfo[$value['send']] .
-                        "申请加入群::" .
-                        $this->groupInfo[$value['send']];
+                        "申请加入群:" .
+                        $this->groupInfo[$value['group_id']];
                 }
             }
 
@@ -148,6 +148,24 @@ class ApplyMenu extends Menu
     }
     function addGroup($msg_id)
     {
+        $memberId    = $this->msg[$msg_id]['send']; //发送人
+        $groupId = $this->msg[$msg_id]['group_id'];
 
+        Db::startTrans();
+        try {
+            GroupMember::create([
+                'group_id'  => $groupId,
+                'member_id' => $memberId
+            ]);
+            Msgbox::update(['status' => '1'], ['id' => $msg_id]);
+            Db::commit();
+            $this->output->writeln("添加成员成功");
+            (new $this)->start();
+
+        } catch (\Throwable $th) {
+            Db::rollback();
+            $this->output->writeln("添加成员失败");
+            (new $this)->start();
+        }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace app\menu;
 
+use app\chat\Action;
 use app\menu\base\Menu;
 use app\model\Group;
 use app\model\GroupMember;
@@ -38,13 +39,9 @@ class GroupMenu extends Menu
     {
         $this->output->writeln("请输入群名称");
         $groupName = trim(fgets(STDIN));
-
         $groupInfo = Group::where('group_name', $groupName)->find();
-        $groupId   = GroupMember::where(['member_id' => USER['id'], 'group_id' => $groupInfo->id])->value('id');
-        if ($groupId) {
-            $this->output->writeln('您已经在群中了');
-            (new $this)->start();
-        }
+
+
         Db::startTrans();
         try {
             if (empty($groupInfo)) {
@@ -57,18 +54,21 @@ class GroupMenu extends Menu
                     'group_id'  => $group->id,
                     'type'      => 0
                 ]);
-                $action = '创建';
+                $this->output->writeln('创建群"' . $groupName . '"成功');
             }
             else {
-                GroupMember::create([
-                    'member_id' => USER['id'],
-                    'group_id'  => $groupInfo->id,
-                    'type'      => 1
+                $groupId = GroupMember::where(['member_id' => USER['id'], 'group_id' => $groupInfo->id])->value('id');
+                if ($groupId) {
+                    $this->output->writeln('您已经在群中了');
+                    (new $this)->start();
+                }
+                Action::send('addGroup', [
+                    'recv_id'  => $groupInfo->member_id,
+                    'group_id' => $groupInfo->id
                 ]);
-                $action = '加入';
+                $this->output->writeln('已经向"' . $groupName . '"发送申请');
             }
             Db::commit();
-            $this->output->writeln($action . '群"' . $groupName . '"成功');
             (new $this)->start();
         } catch (\Throwable $th) {
             Db::rollback();
@@ -79,6 +79,7 @@ class GroupMenu extends Menu
 
     function chatGroup()
     {
+
     }
 
     function delGroup()
@@ -87,16 +88,10 @@ class GroupMenu extends Menu
         $groupName = trim(fgets(STDIN));
         $groupId   = Group::where([
             'member_id'  => USER['id'],
-            'group_name' => $groupName,
-            'type'       => 0
+            'group_name' => $groupName
         ])->value('id');
-        if ($groupId) {
-            Group::destroy($groupId);
-            $this->output->writeln('删除群"' . $groupName . '"成功');
-        }
-        else {
-            $this->output->writeln('没有找到该群,或群不属于您');
-        }
+        Group::destroy($groupId);
+        $this->output->writeln('删除群"' . $groupName . '"成功');
         (new $this)->start();
     }
 
@@ -104,6 +99,23 @@ class GroupMenu extends Menu
     {
         $this->output->writeln("请输入群名称");
         $groupName = trim(fgets(STDIN));
-        
+        $groupId   = Group::where([
+            'group_name' => $groupName,
+        ])->value('id');
+        try {
+            GroupMember::destroy(function ($query) use ($groupId) {
+                $query->where([
+                    ['member_id', '=', USER['id']],
+                    ['type', '=', 1],
+                    ['group_id', '=', $groupId]
+                ]);
+            });
+        } catch (\Throwable $th) {
+            echo $th->getMessage();
+            $this->output->writeln("退出群失败");
+        }
+
+        $this->output->writeln("退出群成功");
+        (new $this)->start();
     }
 }

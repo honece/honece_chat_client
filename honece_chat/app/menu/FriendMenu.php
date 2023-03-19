@@ -22,7 +22,7 @@ class FriendMenu extends Menu
     {
         parent::__construct();
         try {
-            //放在这里不好，每次new对象都会重新查数据库，增加网络IO
+            //放在这里不好，每次new对象都会重新查数据库，增加网络IO，但是每次都会检查最新的在线好友列表
             $this->friend = Friend::getMemberInfo();
         } catch (\Throwable $th) {
             echo $th->getMessage();
@@ -41,6 +41,7 @@ class FriendMenu extends Menu
             (new $this)->start();
         }
     }
+    //添加好友，应该检查一下是否存在好友的
     function addFriend()
     {
         $this->output->writeln("请输入添加账号");

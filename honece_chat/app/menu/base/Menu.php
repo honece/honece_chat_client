@@ -1,8 +1,10 @@
 <?php
 namespace app\menu\base;
 
+use app\chat\TcpClient;
 use app\menu\MainMenu;
 use think\console\Output;
+use Swoole\Server;
 
 class Menu
 {
@@ -43,7 +45,6 @@ class Menu
     function getAction($menuId)
     {
         @$menuFunc = $this->menuActions[$menuId];
-
         if (!$menuFunc) {
             $this->output->writeln("输入错误，请重新输入");
             (new $this)->start();
@@ -52,7 +53,8 @@ class Menu
     }
     function over()
     {
-        die;
+        TcpClient::$conn->close();
+        $this->output->writeln("请键入Ctrl+C以结束程序");
     }
     function mainMenu()
     {

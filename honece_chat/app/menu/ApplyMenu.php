@@ -1,6 +1,7 @@
 <?php
 namespace app\menu;
 
+use app\chat\Action;
 use app\menu\base\Menu;
 use app\model\GroupMember;
 use app\model\Member;
@@ -96,7 +97,8 @@ class ApplyMenu extends Menu
         $msg_id = substr($menufunc, 4);
 
         $this->output->writeln("是否同意申请[Y/n]");
-        while ($msg = trim(fgets(STDIN))) {
+        while (true) {
+            $msg = trim(fgets(STDIN));
             if ($msg == 'Y') {
                 if ($this->msg[$msg_id]['type'] == 0) {
                     $this->addfriend($msg_id);
@@ -109,6 +111,7 @@ class ApplyMenu extends Menu
                 Msgbox::where('id', $msg_id)->update(['status' => '2']);
                 $this->output->writeln("您已拒绝");
                 (new $this)->start();
+                break;
             }
             else {
                 $this->output->writeln("输入错误，请重新输入");
@@ -148,8 +151,8 @@ class ApplyMenu extends Menu
     }
     function addGroup($msg_id)
     {
-        $memberId    = $this->msg[$msg_id]['send']; //发送人
-        $groupId = $this->msg[$msg_id]['group_id'];
+        $memberId = $this->msg[$msg_id]['send']; //发送人
+        $groupId  = $this->msg[$msg_id]['group_id'];
 
         Db::startTrans();
         try {
@@ -160,6 +163,10 @@ class ApplyMenu extends Menu
             Msgbox::update(['status' => '1'], ['id' => $msg_id]);
             Db::commit();
             $this->output->writeln("添加成员成功");
+            Action::send('joinGroup', [
+                'group_id'  => $groupId,
+                'member_id' => $memberId
+            ]);
             (new $this)->start();
 
         } catch (\Throwable $th) {

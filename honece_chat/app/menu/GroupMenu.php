@@ -54,6 +54,10 @@ class GroupMenu extends Menu
                     'group_id'  => $group->id,
                     'type'      => 0
                 ]);
+                Action::send('joinGroup', [
+                    'group_id'  => $group->id,
+                    'member_id' => USER['id']
+                ]);
                 $this->output->writeln('创建群"' . $groupName . '"成功');
             }
             else {
@@ -79,7 +83,14 @@ class GroupMenu extends Menu
 
     function chatGroup()
     {
-
+        $group = Group::hasWhere('getGroup', ['member_id' => USER['id']])->column('Group.group_name', 'Group.id');
+        if (!empty($group)) {
+            (new ChatGroup)->setMenu($group, 'group');
+        }
+        else {
+            $this->output->writeln("没有已加入的群组");
+            (new $this)->start();
+        }
     }
 
     function delGroup()

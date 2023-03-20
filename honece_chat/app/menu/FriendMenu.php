@@ -34,7 +34,7 @@ class FriendMenu extends Menu
             $friend[$value['id']] = $value['account'];
         }
         if (!empty($friend)) {
-            (new ChatMenu)->showFriend($friend);
+            (new ChatMenu)->setMenu($friend,'friend');
         }
         else {
             $this->output->writeln("没有好友在线");

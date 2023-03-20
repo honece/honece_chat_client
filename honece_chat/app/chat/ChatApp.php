@@ -20,8 +20,5 @@ class ChatApp extends TcpClient
 
         Action::send('login');
         MainMenu::start();
-        while ($msg = fgets(STDIN)) {
-            self::$conn->send($msg);
-        }
     }
 }

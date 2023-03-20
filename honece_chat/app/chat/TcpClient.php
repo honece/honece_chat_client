@@ -25,7 +25,7 @@ class TcpClient
             die;
         }
 
-        Coroutine::create([$this, 'recvmsg']);//定时任务，也可以用Timer实现
+        Coroutine::create([$this, 'recvmsg']); //定时任务，也可以用Timer实现
         Coroutine::create([$this, 'main']);
         Coroutine::create([$this, 'keepAlive']);
     }
@@ -37,6 +37,10 @@ class TcpClient
     function recvmsg()
     {
         while (true) {
+            if (!self::$conn->isConnected()) {
+                echo "die";
+                break;
+            }
             $data = self::$conn->recv();
             if (strlen($data) > 0) {
                 echo "\t\n******************************************************\t\n";
@@ -67,6 +71,7 @@ class TcpClient
             }
             \Co::sleep(0.1);
         }
+
     }
     /**
      * 给服务器发心跳包
@@ -74,6 +79,9 @@ class TcpClient
     function keepAlive()
     {
         while (true) {
+            if (!self::$conn->isConnected()) {
+                break;
+            }
             \Co::sleep(50);
             self::$conn->send(json_encode(['action' => 'heartbeat', "pong pong pong"]));
         }

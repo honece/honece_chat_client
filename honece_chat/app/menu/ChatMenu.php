@@ -10,9 +10,11 @@ class ChatMenu extends Menu
 {
     protected string $menuName = '在线好友';
     protected array $subMenu;
-    function showFriend($friend)
+    protected static string $type;
+    function setMenu($chatObj, $type)
     {
-        $this->subMenu = $friend;
+        $this->subMenu = $chatObj;
+        self::$type    = $type;
         $this->start();
     }
     function getAction($menuId)
@@ -20,7 +22,7 @@ class ChatMenu extends Menu
         @$menufunc = $this->menuActions[$menuId];
         if (!$menufunc) {
             $this->output->writeln("输入错误，请重新输入");
-            (new $this)->showFriend($this->subMenu);
+            (new $this)->setMenu($this->subMenu, self::$type);
         }
         if (!method_exists($this, $menufunc)) {
             $this->sendMsg($menufunc);
@@ -28,16 +30,34 @@ class ChatMenu extends Menu
         $this->$menufunc();
     }
 
-    function sendMsg($friendId)
+    function sendMsg($chatId)
     {
-        $this->output->writeln("您正在和{$this->subMenu[$friendId]}聊天，请发送消息");
-        $this->output->writeln("键入 [exit] 返回菜单");
-        while ($msg = trim(fgets(STDIN))) {
-            if ($msg == 'exit') {
-                (new $this)->showFriend($this->subMenu);
-            }
-            Action::send('chat', ['friend_id' => $friendId, 'msg' => $msg]);
+        if (self::$type == 'friend') {
+            $this->output->writeln("您正在和{$this->subMenu[$chatId]}聊天，请发送消息");
         }
+        else if (self::$type == 'group') {
+            $this->output->writeln("您正在[{$this->subMenu[$chatId]}]群组聊天，请发送消息");
+        }
+
+        $this->output->writeln("键入 [exit] 返回菜单");
+        try {
+            while (true) {
+                $msg = trim(fgets(STDIN));
+                if ($msg == 'exit') {
+                    (new $this)->setMenu($this->subMenu, self::$type);
+                    break;
+                }
+                if (self::$type == 'friend') {
+                    Action::send('chat', ['friend_id' => $chatId, 'msg' => $msg]);
+                }
+                else if (self::$type == 'group') {
+                    Action::send('chatGroup', ['group_id' => $chatId, 'msg' => $msg]);
+                }
+            }
+        } catch (\Throwable $th) {
+            echo $th->getMessage();
+        }
+
     }
 
 }

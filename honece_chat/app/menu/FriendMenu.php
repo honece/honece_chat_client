@@ -22,7 +22,6 @@ class FriendMenu extends Menu
     {
         parent::__construct();
         try {
-            //放在这里不好，每次new对象都会重新查数据库，增加网络IO，但是每次都会检查最新的在线好友列表
             $this->friend = Friend::getMemberInfo();
         } catch (\Throwable $th) {
             echo $th->getMessage() . PHP_EOL;

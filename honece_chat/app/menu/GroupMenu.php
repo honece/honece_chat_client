@@ -122,7 +122,7 @@ class GroupMenu extends Menu
                 ]);
             });
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            echo $th->getMessage().PHP_EOL;
             $this->output->writeln("退出群失败");
         }
 

@@ -19,7 +19,7 @@ class ChatMenu extends Menu
     }
     function getAction($menuId)
     {
-        $menufunc = $this->menuActions[$menuId];
+        @$menufunc = $this->menuActions[$menuId];
         if (!$menufunc) {
             $this->output->writeln("输入错误，请重新输入");
             $this->setMenu($this->subMenu, self::$type);
@@ -27,7 +27,8 @@ class ChatMenu extends Menu
 
         if (!method_exists($this, $menufunc)) {
             $this->sendMsg($menufunc);
-        }else{
+        }
+        else {
             $this->$menufunc();
         }
 
@@ -57,7 +58,7 @@ class ChatMenu extends Menu
                 }
             }
         } catch (\Throwable $th) {
-            echo $th->getMessage() . PHP_EOL;
+            var_dump($th->getFile(), $th->getLine());
         }
 
     }

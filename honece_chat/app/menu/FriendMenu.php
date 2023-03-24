@@ -25,7 +25,8 @@ class FriendMenu extends Menu
             //放在这里不好，每次new对象都会重新查数据库，增加网络IO，但是每次都会检查最新的在线好友列表
             $this->friend = Friend::getMemberInfo();
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            echo $th->getMessage() . PHP_EOL;
+
         }
     }
     function chatFriend()
@@ -34,11 +35,11 @@ class FriendMenu extends Menu
             $friend[$value['id']] = $value['account'];
         }
         if (!empty($friend)) {
-            (new ChatMenu)->setMenu($friend,'friend');
+            (new ChatMenu)->setMenu($friend, 'friend');
         }
         else {
             $this->output->writeln("没有好友在线");
-            (new $this)->start();
+            $this->start();
         }
     }
     //添加好友，应该检查一下是否存在好友的
@@ -51,7 +52,7 @@ class FriendMenu extends Menu
             ->value('id');
         if (!$friendId) {
             $this->output->writeln("没有这个用户,请重新输入");
-            (new $this)->start();
+            $this->start();
         }
 
         Action::send(
@@ -59,7 +60,7 @@ class FriendMenu extends Menu
             ['friend_id' => $friendId]
         );
         $this->output->writeln("已经发送添加好友请求");
-        (new $this)->start();
+        $this->start();
     }
     function delFriend()
     {
@@ -75,7 +76,7 @@ class FriendMenu extends Menu
             }
             if (!isset($friendId)) {
                 $this->output->writeln("未找到好友");
-                (new $this)->start();
+                $this->start();
             }
             Friend::whereOr([
                 [
@@ -89,10 +90,10 @@ class FriendMenu extends Menu
             ])->delete();
 
             $this->output->writeln("删除好友成功");
-            (new $this)->start();
+            $this->start();
         } catch (\Throwable $th) {
             $this->output->writeln("删除好友失败");
-            (new $this)->start();
+            $this->start();
         }
     }
 }

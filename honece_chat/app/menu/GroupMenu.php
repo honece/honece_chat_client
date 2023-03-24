@@ -32,7 +32,7 @@ class GroupMenu extends Menu
             }
             $this->output->writeln("*************************");
         }
-        (new $this)->start();
+        $this->start();
     }
 
     function addGroup()
@@ -64,7 +64,7 @@ class GroupMenu extends Menu
                 $groupId = GroupMember::where(['member_id' => USER['id'], 'group_id' => $groupInfo->id])->value('id');
                 if ($groupId) {
                     $this->output->writeln('您已经在群中了');
-                    (new $this)->start();
+                    $this->start();
                 }
                 Action::send('addGroup', [
                     'recv_id'  => $groupInfo->member_id,
@@ -73,11 +73,11 @@ class GroupMenu extends Menu
                 $this->output->writeln('已经向"' . $groupName . '"发送申请');
             }
             Db::commit();
-            (new $this)->start();
+            $this->start();
         } catch (\Throwable $th) {
             Db::rollback();
             $this->output->writeln('未知原因，失败');
-            (new $this)->start();
+            $this->start();
         }
     }
 
@@ -89,7 +89,7 @@ class GroupMenu extends Menu
         }
         else {
             $this->output->writeln("没有已加入的群组");
-            (new $this)->start();
+            $this->start();
         }
     }
 
@@ -103,7 +103,7 @@ class GroupMenu extends Menu
         ])->value('id');
         Group::destroy($groupId);
         $this->output->writeln('删除群"' . $groupName . '"成功');
-        (new $this)->start();
+        $this->start();
     }
 
     function outGroup()
@@ -127,6 +127,6 @@ class GroupMenu extends Menu
         }
 
         $this->output->writeln("退出群成功");
-        (new $this)->start();
+        $this->start();
     }
 }

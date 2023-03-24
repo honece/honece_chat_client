@@ -38,7 +38,6 @@ class TcpClient
     {
         while (true) {
             if (!self::$conn->isConnected()) {
-                echo "die";
                 break;
             }
             $data = self::$conn->recv();
@@ -82,7 +81,7 @@ class TcpClient
             if (!self::$conn->isConnected()) {
                 break;
             }
-            \Co::sleep(50);
+            \Co::sleep(3);
             self::$conn->send(json_encode(['action' => 'heartbeat', "pong pong pong"]));
         }
     }

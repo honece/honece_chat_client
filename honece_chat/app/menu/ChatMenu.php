@@ -19,15 +19,18 @@ class ChatMenu extends Menu
     }
     function getAction($menuId)
     {
-        @$menufunc = $this->menuActions[$menuId];
+        $menufunc = $this->menuActions[$menuId];
         if (!$menufunc) {
             $this->output->writeln("输入错误，请重新输入");
-            (new $this)->setMenu($this->subMenu, self::$type);
+            $this->setMenu($this->subMenu, self::$type);
         }
+
         if (!method_exists($this, $menufunc)) {
             $this->sendMsg($menufunc);
+        }else{
+            $this->$menufunc();
         }
-        $this->$menufunc();
+
     }
 
     function sendMsg($chatId)
@@ -44,8 +47,7 @@ class ChatMenu extends Menu
             while (true) {
                 $msg = trim(fgets(STDIN));
                 if ($msg == 'exit') {
-                    (new $this)->setMenu($this->subMenu, self::$type);
-                    break;
+                    return $this->setMenu($this->subMenu, self::$type);
                 }
                 if (self::$type == 'friend') {
                     Action::send('chat', ['friend_id' => $chatId, 'msg' => $msg]);
@@ -55,7 +57,7 @@ class ChatMenu extends Menu
                 }
             }
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            echo $th->getMessage() . PHP_EOL;
         }
 
     }

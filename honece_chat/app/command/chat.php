@@ -21,7 +21,5 @@ class chat extends Command
     protected function execute(Input $input, Output $output)
     {
         $cahtApp = invoke('app\chat\chatApp');
-        //启动tcp服务
-        $cahtApp->run();
     }
 }

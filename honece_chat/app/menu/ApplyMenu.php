@@ -83,7 +83,7 @@ class ApplyMenu extends Menu
         @$menufunc = $this->menuActions[$menuId];
         if (!$menufunc) {
             $this->output->writeln("输入错误，请重新输入");
-            (new $this)->start($menuId);
+            $this->start($menuId);
         }
         if (!method_exists($this, $menufunc)) {
             $this->showMsg($menufunc);
@@ -110,8 +110,7 @@ class ApplyMenu extends Menu
             else if ($msg == 'n') {
                 Msgbox::where('id', $msg_id)->update(['status' => '2']);
                 $this->output->writeln("您已拒绝");
-                (new $this)->start();
-                break;
+                return $this->start();
             }
             else {
                 $this->output->writeln("输入错误，请重新输入");
@@ -119,7 +118,7 @@ class ApplyMenu extends Menu
         }
 
         //返回消息列表
-        (new $this)->start();
+        $this->start();
 
     }
     function addfriend($msg_id)
@@ -140,12 +139,12 @@ class ApplyMenu extends Menu
             Msgbox::update(['status' => '1'], ['id' => $msg_id]);
             Db::commit();
             $this->output->writeln("添加好友成功");
-            (new $this)->start();
+            $this->start();
 
         } catch (\Throwable $th) {
             Db::rollback();
             $this->output->writeln("添加好友失败");
-            (new $this)->start();
+            $this->start();
         }
 
     }
@@ -167,12 +166,12 @@ class ApplyMenu extends Menu
                 'group_id'  => $groupId,
                 'member_id' => $memberId
             ]);
-            (new $this)->start();
+            $this->start();
 
         } catch (\Throwable $th) {
             Db::rollback();
             $this->output->writeln("添加成员失败");
-            (new $this)->start();
+            $this->start();
         }
     }
 }

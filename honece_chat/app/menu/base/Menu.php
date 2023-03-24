@@ -28,13 +28,20 @@ class Menu
     function showMenu()
     {
         $this->output->writeln("-------------" . $this->menuName . "-------------");
+        if (count($this->menuActions) == 1) {
+            foreach ($this->subMenu as $key => $value) {
+                $this->menuActions[] = $key;
+            }
+        }
+
         foreach ($this->subMenu as $key => $value) {
             $this->output->writeln(self::$menu_id++ . "." . $value);
-            $this->menuActions[] = $key;
         }
         //如果不是主菜单添加主菜单选项
         if ('MainMenu' != (new \ReflectionClass($this))->getShortName()) {
-            $this->menuActions[] = 'mainMenu';
+            if (!in_array('mainMenu', $this->menuActions)) {
+                $this->menuActions[] = 'mainMenu';
+            }
             $this->output->writeln(self::$menu_id . ".主菜单");
         }
         $this->output->writeln("0.退出");
@@ -47,14 +54,14 @@ class Menu
         @$menuFunc = $this->menuActions[$menuId];
         if (!$menuFunc) {
             $this->output->writeln("输入错误，请重新输入");
-            (new $this)->start();
+            $this->start();
         }
         $this->$menuFunc();
     }
     function over()
     {
         TcpClient::$conn->close();
-        $this->output->writeln("请键入Ctrl+C以结束程序");
+        die;
     }
     function mainMenu()
     {
